@@ -20,7 +20,7 @@ const Customizer = () => {
 
   const [file, setFile] = useState("");
 
-  const [propmt, setPropmt] = useState("");
+  const [prompt, setPrompt] = useState("");
   const [generatingImg, setGeneratingImg] = useState(false);
 
   const [activeEditorTab, setActiveEditorTab] = useState("");
@@ -38,8 +38,8 @@ const Customizer = () => {
       case "aipicker":
         return (
           <AIPicker
-            propmt={propmt}
-            setPropmt={setPropmt}
+            prompt={prompt}
+            setPrompt={setPrompt}
             generatingImg={generatingImg}
             handleSubmit={handleSubmit}
           />
@@ -50,9 +50,24 @@ const Customizer = () => {
   };
 
   const handleSubmit = async (type) => {
-    if (!propmt) return alert("Please enter a prompt");
+    if (!prompt) return alert("Please enter a prompt");
 
     try {
+      setGeneratingImg(true);
+
+      const response = await fetch("/api/logo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt,
+        }),
+      });
+
+      const data = await response.json();
+
+      handleDecals(type, `data:image/png;base64,${data.photo}`);
     } catch (error) {
       alert(error);
     } finally {
@@ -78,9 +93,11 @@ const Customizer = () => {
         break;
       case "stylishShirt":
         state.isFullTexture = !activeFilterTab[tabName];
+        break;
       default:
         state.isLogoTrue = true;
         state.isFullTexture = false;
+        break;
     }
 
     setActiveFilterTab((prevState) => {
